@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poetry Reading - Mic + Pronunciation</title>
+<style>
+body {
+    font-family: Georgia, serif;
+    background: black;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+h1 { font-size: 40px; }
+.poem-box {
+    border: 2px solid white;
+    padding: 30px;
+    margin: 40px auto;
+    max-width: 650px;
+    border-radius: 15px;
+    font-size: 22px;
+    line-height: 1.6;
+}
+button {
+    padding: 12px 30px;
+    font-size: 18px;
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+    border-radius: 25px;
+    cursor: pointer;
+    margin: 10px;
+    transition: 0.3s;
+}
+button:hover { background: white; color: black; }
+#feedback { margin-top: 20px; font-size: 20px; color: #0f0; }
+</style>
+</head>
+<body>
+
+<h1>Poetry Reading</h1>
+<p>Read the poem aloud and check your pronunciation!</p>
+
+<div class="poem-box" id="poemBox"></div>
+
+<button id="micBtn">🎤 Start Speaking</button>
+<button id="hearBtn">🔊 Hear Correct Pronunciation</button>
+<div id="feedback"></div>
+
+<script>
+// Example poem
+const poem = "The sun will rise the night will fade";
+
+// Show poem
+document.getElementById("poemBox").innerText = poem;
+
+// Speech Synthesis (Text-to-Speech) for correct pronunciation
+function speakPoem(){
+    const utterance = new SpeechSynthesisUtterance(poem);
+    utterance.lang = 'en-US';
+    speechSynthesis.speak(utterance);
+}
+
+document.getElementById("hearBtn").onclick = () => speakPoem();
+
+// Speech Recognition (Student reading)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if(SpeechRecognition){
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    const micBtn = document.getElementById("micBtn");
+    const feedback = document.getElementById("feedback");
+
+    micBtn.onclick = () => {
+        recognition.start();
+        feedback.innerText = "Listening... Speak the poem clearly!";
+    }
+
+    recognition.onresult = (event) => {
+        const spokenText = event.results[0][0].transcript.replace(/[,\.]/g,"").toLowerCase();
+        const correctText = poem.replace(/[,\.]/g,"").toLowerCase();
+
+        if(spokenText === correctText){
+            feedback.innerText = `✅ Correct! You said: "${spokenText}"`;
+        } else {
+            feedback.innerText = `❌ Try again! You said: "${spokenText}"`;
+        }
+    }
+
+    recognition.onerror = (event) => {
+        feedback.innerText = "Error: " + event.error;
+    }
+}else{
+    alert("Speech Recognition not supported in this browser. Use Chrome or Edge.");
+}
+</script>
+
+</body>
+</html>
